@@ -9,6 +9,7 @@ from app.models import BookingState
 import re
 import json
 import base64
+from datetime import datetime, timedelta
 
 router = APIRouter(
     prefix="/chat",
@@ -63,6 +64,9 @@ class ChatRequest(BaseModel):
     hotel_id: str
     user_location: Optional[str] = None
 
+class ResetRequest(BaseModel):
+    hotel_id: str
+
 @router.post("/translate")
 async def translate_text(request: TranslationRequest):
     """
@@ -88,10 +92,12 @@ async def send_message(request: ChatRequest, db: Session = Depends(get_db)):
     # Convert pydantic models to dicts for the NVIDIA client
     dict_messages = [{"role": msg.role, "content": msg.content} for msg in request.messages]
     
-    # Check for active booking state context
+    # Check for active booking state context (only if updated in last 2 hours)
+    two_hours_ago = datetime.utcnow() - timedelta(hours=2)
     active_booking = db.query(BookingState).filter(
         BookingState.hotel_id == request.hotel_id,
-        BookingState.current_step != "completed"
+        BookingState.current_step != "completed",
+        BookingState.updated_at >= two_hours_ago
     ).first()
     
     booking_context_str = None
@@ -172,6 +178,22 @@ async def send_message(request: ChatRequest, db: Session = Depends(get_db)):
     except Exception as e:
         import traceback
         traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reset")
+async def reset_chat(request: ResetRequest, db: Session = Depends(get_db)):
+    """
+    Clears any active (non-completed) booking states for the user.
+    """
+    try:
+        db.query(BookingState).filter(
+            BookingState.hotel_id == request.hotel_id,
+            BookingState.current_step != "completed"
+        ).delete()
+        db.commit()
+        return {"status": "success", "message": "Chat context reset successfully"}
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/recommendation-image")

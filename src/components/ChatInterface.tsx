@@ -432,9 +432,21 @@ export default function ChatInterface() {
     }
   }, []);
 
-  const clearChat = () => {
+  const clearChat = async () => {
     // Clear all chat-related localStorage keys
     localStorage.removeItem("chat_history");
+
+    // Also clear active booking state in the backend
+    try {
+      await fetch("http://127.0.0.1:8000/api/v1/chat/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hotel_id: "H-100" })
+      });
+    } catch (err) {
+      console.error("Failed to reset backend context:", err);
+    }
+
     // Create a brand-new array with a fresh welcome message
     const freshWelcome: ChatMessage = {
       id: `welcome-${Date.now()}`,
