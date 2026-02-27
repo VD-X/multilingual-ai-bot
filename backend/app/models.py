@@ -65,6 +65,8 @@ class BookingState(Base):
     service_type = Column(String, nullable=False) # e.g., "taxi", "restaurant"
     current_step = Column(String, nullable=False)
     temp_data_json = Column(JSON, default=dict)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
 class Booking(Base):
     __tablename__ = "bookings"

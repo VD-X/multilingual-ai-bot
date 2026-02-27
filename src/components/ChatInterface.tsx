@@ -430,13 +430,28 @@ export default function ChatInterface() {
         (err) => console.log("Geolocation permission denied:", err)
       );
     }
+
+    // Cross-tab synchronization: if chat_history is cleared in another tab, update this one
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "chat_history") {
+        setMessages(loadSavedMessages());
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const clearChat = async () => {
-    // Clear all chat-related localStorage keys
+    // 1. Perform a "Global Reset" of all trip-related persistence
     localStorage.removeItem("chat_history");
+    localStorage.removeItem("current_itinerary");
+    localStorage.removeItem("confirmed_bookings");
 
-    // Also clear active booking state in the backend
+    // 2. Dispatch events so other tabs/panels know to clear their local states
+    window.dispatchEvent(new Event("itinerary_updated"));
+    window.dispatchEvent(new Event("bookings_updated"));
+
+    // 3. Clear active booking state in the backend
     try {
       await fetch("http://127.0.0.1:8000/api/v1/chat/reset", {
         method: "POST",
@@ -447,7 +462,7 @@ export default function ChatInterface() {
       console.error("Failed to reset backend context:", err);
     }
 
-    // Create a brand-new array with a fresh welcome message
+    // 4. Reset local message state to just the welcome message
     const freshWelcome: ChatMessage = {
       id: `welcome-${Date.now()}`,
       role: "bot",

@@ -180,8 +180,18 @@ export default function ItineraryPanel() {
 
   useEffect(() => {
     loadPlan();
+
+    const handleSync = (e: StorageEvent) => {
+      if (e.key === "current_itinerary") loadPlan();
+    };
+
     window.addEventListener("itinerary_updated", loadPlan);
-    return () => window.removeEventListener("itinerary_updated", loadPlan);
+    window.addEventListener("storage", handleSync);
+
+    return () => {
+      window.removeEventListener("itinerary_updated", loadPlan);
+      window.removeEventListener("storage", handleSync);
+    };
   }, []);
 
   const clearPlan = () => {

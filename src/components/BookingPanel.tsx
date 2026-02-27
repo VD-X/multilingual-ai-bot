@@ -110,15 +110,25 @@ export default function BookingPanel() {
 
   useEffect(() => {
     loadBookings();
-    window.addEventListener("bookings_updated", loadBookings);
 
+    const handleSync = (e: StorageEvent) => {
+      if (e.key === "confirmed_bookings") loadBookings();
+    };
+
+    window.addEventListener("bookings_updated", loadBookings);
+    window.addEventListener("storage", handleSync);
+
+    // Check for user location sync too
     const locStr = localStorage.getItem("current_user_location");
     if (locStr) {
       const [lat, lng] = locStr.split(",").map(Number);
       if (!isNaN(lat) && !isNaN(lng)) setLiveCoords([lat, lng]);
     }
 
-    return () => window.removeEventListener("bookings_updated", loadBookings);
+    return () => {
+      window.removeEventListener("bookings_updated", loadBookings);
+      window.removeEventListener("storage", handleSync);
+    };
   }, []);
 
   const removeBooking = (id: string) => {
@@ -160,8 +170,8 @@ export default function BookingPanel() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveTab(type.id as any)}
             className={`clay-card flex-1 p-4 rounded-3xl flex flex-col items-center gap-2 transition-all cursor-pointer ${activeTab === type.id
-                ? "ring-2 ring-primary shadow-lg bg-primary/5 border-primary/20"
-                : "border-transparent hover:bg-white/90"
+              ? "ring-2 ring-primary shadow-lg bg-primary/5 border-primary/20"
+              : "border-transparent hover:bg-white/90"
               }`}
           >
             <type.icon className={`w-6 h-6 ${type.color} ${activeTab === type.id ? "animate-bounce" : ""}`} />
