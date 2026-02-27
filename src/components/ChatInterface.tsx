@@ -256,7 +256,16 @@ const RecommendationCard = ({
   const [showMap, setShowMap] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
 
-  const images = item.images && item.images.length > 0 ? item.images : [item.image_url];
+  // Build a reliable Unsplash image URL from place name + category
+  const getImageUrl = (url: string, name: string, category: string) => {
+    // Use the LLM-provided URL first, but build a reliable Unsplash fallback
+    const query = encodeURIComponent(`${name} ${category} India travel`);
+    return url && url.startsWith('http') ? url : `https://source.unsplash.com/400x300/?${query}`;
+  };
+
+  const images = item.images && item.images.length > 0
+    ? item.images
+    : [getImageUrl(item.image_url, item.name, item.category)];
 
   const nextImg = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -285,7 +294,9 @@ const RecommendationCard = ({
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
               onClick={() => onImageClick(images[imgIndex])}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=200&q=80";
+                const el = e.target as HTMLImageElement;
+                const query = encodeURIComponent(`${item.name} ${item.category} India`);
+                el.src = `https://source.unsplash.com/400x300/?${query}`;
               }}
             />
 
@@ -422,8 +433,15 @@ export default function ChatInterface() {
   }, []);
 
   const clearChat = () => {
-    const freshWelcome: ChatMessage = { ...WELCOME_MSG, id: Date.now().toString(), timestamp: new Date() };
+    // Clear all chat-related localStorage keys
     localStorage.removeItem("chat_history");
+    // Create a brand-new array with a fresh welcome message
+    const freshWelcome: ChatMessage = {
+      id: `welcome-${Date.now()}`,
+      role: "bot",
+      content: WELCOME_MSG.content,
+      timestamp: new Date(),
+    };
     setMessages([freshWelcome]);
   };
 
