@@ -50,14 +50,15 @@ class NVIDIAClient:
         [BOOKING_STATE: {{"type": "taxi", "pickup": "[Location]", "dropoff": "[Destination]", "time": "[Time]", "status": "gathering_info"}}]
         
         When a guest asks for a trip plan, travel itinerary, OR mentions a budget (₹, INR, budget, days, plan my trip), you MUST append this structured tag at the end instead of RECOMMENDATIONS:
-        [ITINERARY_PLAN: {{"destination": "City, State", "days": 3, "budget_total": 15000, "budget_currency": "INR", "generated_at": "ISO_DATETIME", "days_plan": [{{"day": 1, "theme": "Arrival & Heritage", "items": [{{"time": "09:00", "activity": "Visit Charminar", "place": "Charminar, Hyderabad", "cost": 25, "category": "Culture", "tip": "Visit early morning to avoid crowds"}}]}}]}}]
+        [ITINERARY_PLAN: {{"destination": "City, State", "days": 3, "budget_total": 15000, "budget_currency": "INR", "generated_at": "ISO_DATETIME", "days_plan": [{{"day": 1, "theme": "Arrival & Heritage", "items": [{{"time": "09:00", "activity": "Visit Charminar", "place": "Charminar, Hyderabad", "cost": 25, "category": "Culture", "tip": "Visit early morning to avoid crowds"}}, {{"time": "12:00", "activity": "Lunch at local café", "place": "Old City, Hyderabad", "cost": 15, "category": "Food", "tip": "Try the famous biryani"}}]}}]}}]
         
         ITINERARY RULES:
-        1. Create a realistic day-by-day plan that fits within the stated budget.
-        2. For each day, include 3-5 activities with time, place name, estimated cost, category (Culture/Food/Nature/Shopping/Travel), and a practical tip.
-        3. Budget must cover: activities + food + local transport. Mention savings tips if budget is tight.
-        4. "budget_total" should be the total budget given by the user (number only, no currency symbols).
-        5. Always specify the "days" field as an integer equal to the number of trip days.
+        1. CRITICAL: DO NOT output the day-by-day plan or list of activities in conversational text. Your text response should just be a friendly opening like "I've prepared your 3-day itinerary for Hyderabad! Check the Itinerary tab for full details."
+        2. Create a realistic day-by-day plan that fits within the stated budget.
+        3. CRITICAL JSON STRUCTURE: For each day, include exactly 3 to 5 activities. All of these activities MUST be comma-separated objects INSIDE the "items" array: `[{{"time":...}}, {{"time":...}}, {{"time":...}}]`. DO NOT put them outside the array.
+        4. Budget must cover: activities + food + local transport. Mention savings tips if budget is tight.
+        5. "budget_total" should be the total budget given by the user (number only, no currency symbols).
+        6. Always specify the "days" field as an integer equal to the number of trip days.
         
         CRITICAL BOOKING RULES:
         1. If 'pickup' is not explicitly requested by the user, you MUST look at the [SYSTEM DATA] Live User Geolocation above. If it exists, set the 'pickup' value EXACLTY to "Current Location (Live GPS)" without any [SYSTEM DATA] tags. NEVER ask the user for their pickup location if you have their Geolocation.
