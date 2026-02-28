@@ -6,7 +6,6 @@ import ZoneSafetyPanel from "@/components/ZoneSafetyPanel";
 import ItineraryPanel from "@/components/ItineraryPanel";
 import EmergencyPanel from "@/components/EmergencyPanel";
 import BookingPanel from "@/components/BookingPanel";
-import AdminDashboard from "@/components/AdminDashboard";
 import { SkeletonLoader, ChatSkeleton, ZoneSkeleton, CardSkeleton } from "@/components/SkeletonLoader";
 
 const TABS = [
@@ -15,7 +14,6 @@ const TABS = [
   { id: "zones", label: "Zones", icon: Map },
   { id: "booking", label: "Booking", icon: Car },
   { id: "emergency", label: "SOS", icon: AlertTriangle },
-  { id: "admin", label: "Admin", icon: LayoutDashboard },
 ];
 
 export default function Index() {
@@ -49,7 +47,6 @@ export default function Index() {
       case "itinerary": return <ItineraryPanel />;
       case "booking": return <BookingPanel />;
       case "emergency": return <EmergencyPanel />;
-      case "admin": return <AdminDashboard />;
       default: return null;
     }
   };
