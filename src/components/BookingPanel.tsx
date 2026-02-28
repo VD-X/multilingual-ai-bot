@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { RideTrackingMap } from "./RideTrackingMap";
 import { NearbyPlaces } from "./NearbyPlaces";
+import { NearbyGuides } from "./NearbyGuides";
 
 interface ConfirmedBooking {
   id: string;
@@ -20,6 +21,7 @@ interface ConfirmedBooking {
 
 const BOOKING_TYPES = [
   { id: "taxi", label: "Taxi", icon: Car, color: "text-ocean" },
+  { id: "guide", label: "Guide", icon: MapPin, color: "text-emerald" },
   { id: "restaurant", label: "Restaurant", icon: UtensilsCrossed, color: "text-accent" },
   { id: "hotel", label: "Hotel", icon: Hotel, color: "text-gold" },
 ];
@@ -37,7 +39,6 @@ const formatLocation = (loc: string) => {
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-// ─── LocationSection: shows NearbyPlaces for one coordinate source ───────
 const LocationSection = ({
   coords,
   label,
@@ -45,7 +46,7 @@ const LocationSection = ({
 }: {
   coords: [number, number];
   label: string;
-  filterType: "restaurant" | "hotel";
+  filterType: "restaurant" | "hotel" | "guide";
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -55,7 +56,7 @@ const LocationSection = ({
         className="w-full flex items-center gap-3 p-3 hover:bg-gray-50/50 transition-colors"
         onClick={() => setOpen(!open)}
       >
-        <span className="text-lg">{filterType === "restaurant" ? "🍽️" : "🏨"}</span>
+        <span className="text-lg">{filterType === "restaurant" ? "🍽️" : filterType === "guide" ? "🧭" : "🏨"}</span>
         <div className="flex-1 text-left min-w-0">
           <p className="text-sm font-bold text-foreground truncate">{label}</p>
           <p className="text-[10px] text-muted-foreground">
@@ -76,11 +77,15 @@ const LocationSection = ({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden px-3 pb-3"
           >
-            <NearbyPlaces
-              coords={coords}
-              label={label}
-              defaultFilter={filterType}
-            />
+            {filterType === "guide" ? (
+              <NearbyGuides coords={coords} label={label} />
+            ) : (
+              <NearbyPlaces
+                coords={coords}
+                label={label}
+                defaultFilter={filterType}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -90,7 +95,7 @@ const LocationSection = ({
 
 // ─── Main Panel ───────────────────────────────────────────────────────────
 export default function BookingPanel() {
-  const [activeTab, setActiveTab] = useState<"taxi" | "restaurant" | "hotel">("taxi");
+  const [activeTab, setActiveTab] = useState<"taxi" | "guide" | "restaurant" | "hotel">("taxi");
   const [confirmedBookings, setConfirmedBookings] = useState<ConfirmedBooking[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<Record<string, string>>({});
@@ -368,6 +373,33 @@ export default function BookingPanel() {
                   <p className="text-sm text-muted-foreground">✅ Confirm → 🗺️ Track here</p>
                 </div>
               </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ══════ GUIDES TAB ══════ */}
+        {activeTab === "guide" && (
+          <motion.div
+            key="guide"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="space-y-4"
+          >
+            {locationSources.map((loc, idx) => (
+              <LocationSection
+                key={idx}
+                coords={loc.coords}
+                label={loc.label}
+                filterType="guide"
+              />
+            ))}
+            {locationSources.length === 0 && (
+              <div className="text-center text-muted-foreground p-8 bg-white/50 rounded-2xl border border-dashed border-gray-200">
+                <MapPin className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                <p>No location context available.</p>
+                <p className="text-sm mt-1">Share your location or book a taxi first.</p>
+              </div>
             )}
           </motion.div>
         )}

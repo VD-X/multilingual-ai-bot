@@ -121,3 +121,67 @@ export const EMERGENCY_CONTACTS = [
   { label: "Embassy Hotline", number: "+1-202-555-0147", icon: "🏛️" },
   { label: "Hotel Reception", number: "0", icon: "🏨" },
 ];
+
+export interface TourGuide {
+  id: string;
+  name: string;
+  avatar: string;
+  rating: number;
+  reviews: number;
+  pricePerDay: number;
+  languages: string[];
+  contact: string;
+  specialties: string[];
+  availability: "Available Now" | "Pre-booking Only";
+}
+
+export const MOCK_GUIDES: TourGuide[] = [
+  {
+    id: "g1",
+    name: "Rajesh Kumar",
+    avatar: "RK",
+    rating: 4.9,
+    reviews: 128,
+    pricePerDay: 1500,
+    languages: ["Hindi", "English"],
+    contact: "+91 98765 43210",
+    specialties: ["Historical Tours", "Forts & Palaces"],
+    availability: "Available Now"
+  },
+  {
+    id: "g2",
+    name: "Priya Sharma",
+    avatar: "PS",
+    rating: 4.8,
+    reviews: 95,
+    pricePerDay: 1200,
+    languages: ["English", "Spanish", "Hindi"],
+    contact: "+91 87654 32109",
+    specialties: ["Food Walks", "Local Markets", "Culture"],
+    availability: "Pre-booking Only"
+  },
+  {
+    id: "g3",
+    name: "Vikram Singh",
+    avatar: "VS",
+    rating: 4.7,
+    reviews: 210,
+    pricePerDay: 1800,
+    languages: ["English", "French"],
+    contact: "+91 76543 21098",
+    specialties: ["Photography Tours", "Nature & Wildlife"],
+    availability: "Available Now"
+  },
+  {
+    id: "g4",
+    name: "Anita Desai",
+    avatar: "AD",
+    rating: 5.0,
+    reviews: 42,
+    pricePerDay: 2000,
+    languages: ["English", "Hindi", "Marathi"],
+    contact: "+91 65432 10987",
+    specialties: ["Spiritual Tours", "Temple Architecture"],
+    availability: "Pre-booking Only"
+  }
+];
