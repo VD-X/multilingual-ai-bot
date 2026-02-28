@@ -36,8 +36,9 @@ def read_root():
 def health_check():
     return {"status": "ok", "environment": settings.environment}
 
-from app.routers import chat, booking
+from app.routers import chat, booking, zones
 
 # Include routers here later
 app.include_router(chat.router, prefix="/api/v1")
 app.include_router(booking.router, prefix="/api/v1")
+app.include_router(zones.router, prefix="/api/v1")
